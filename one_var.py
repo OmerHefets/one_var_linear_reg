@@ -67,13 +67,28 @@ def cost_function(x, y, theta):
     return np.asscalar(J)
 
 
-def add_x0_column(X_matrix):
-    m = np.size(X_matrix, 0)
-    return np.c_[np.ones(m), X_matrix]
+def add_x0_column(x_matrix):
+    m = np.size(x_matrix, 0)
+    x_matrix = np.c_[np.ones(m), x_matrix]
+    return x_matrix
+
+
+def random_theta(para_num):
+    rand_theta = np.reshape(np.random.rand(para_num), (para_num, 1))
+    print(rand_theta)
+
+
+"""def regression(file, ):
+    data = load_data(file)
+    m, parameters = matrix_size(data)
+    x_data, y_data = seperate_x_y(data, 1)
+    x_data = add_x0_column(x_data)"""
 
 
 mat = load_data("ex1data1.txt")
 m, parameters = matrix_size(mat)
+mat = add_x0_column(mat)
+random_theta(4)
 # x_para, y_para = seperate_x_y(mat, parameters)
 # x_para = add_x0_column(x_para)
 # print(cost_function(x_para, y_para, np.matrix('1;1')))
