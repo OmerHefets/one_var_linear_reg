@@ -4,6 +4,9 @@ import matplotlib.pyplot as plt
 # from sklearn import preprocessing
 
 
+# one variable linear regression without using feature normalization
+
+
 def load_data(file_name):
     matrix = np.loadtxt(file_name, delimiter=",")
     return matrix
@@ -43,8 +46,19 @@ def print_plot(matrix):
     plt.show()
 
 
+def print_reg(matrix, theta):
+    x_arr = turn_mat_col_to_arr(matrix, 1)
+    y_arr = turn_mat_col_to_arr(matrix, 2)
+    plt.scatter(x_arr, y_arr)
+    plt.xlabel('population')
+    plt.ylabel('profit')
+    x = np.arange(min(x_arr), max(x_arr), 0.2)
+    plt.plot(x, theta[0] + theta[1] * x)
+    plt.show()
+
+
 def scaling_normalization(matrix):
-    scaled_mat = np.matrix(matrix)
+    scaled_mat = matrix
     rows, columns = matrix_size(scaled_mat)
     for i in range(1, columns + 1):
         columns_arr = turn_mat_col_to_arr(scaled_mat, i)
@@ -75,21 +89,34 @@ def add_x0_column(x_matrix):
 
 def random_theta(para_num):
     rand_theta = np.reshape(np.random.rand(para_num), (para_num, 1))
-    print(rand_theta)
+    return rand_theta
 
 
-"""def regression(file, ):
+def data_structuring(file):
     data = load_data(file)
+    # scaling_normalization(data)
     m, parameters = matrix_size(data)
-    x_data, y_data = seperate_x_y(data, 1)
-    x_data = add_x0_column(x_data)"""
+    x_data, y_data = seperate_x_y(data, parameters)
+    x_data = add_x0_column(x_data)
+    first_theta = random_theta(parameters)
+    print_plot(data)
+    return x_data, y_data, first_theta
 
 
-mat = load_data("ex1data1.txt")
-m, parameters = matrix_size(mat)
-mat = add_x0_column(mat)
-random_theta(4)
-# x_para, y_para = seperate_x_y(mat, parameters)
-# x_para = add_x0_column(x_para)
-# print(cost_function(x_para, y_para, np.matrix('1;1')))
+def regression(file_name, alpha=0.01, iter=2000):
+    x, y, theta = data_structuring(file_name)
+    m = np.size(x, 0)
+    error = []
+    for i in range(iter):
+        error.append(cost_function(x, y, theta))
+        grad_calculation = np.dot(x.transpose(), h_sub_y(x, y, theta))
+        theta -= (alpha / m) * grad_calculation
+    plt.plot(error)
+    plt.ylabel('J')
+    plt.show()
+    return theta
 
+
+reg_theta = regression('ex1data1.txt')
+mat = load_data('ex1data1.txt')
+print_reg(mat, reg_theta)
