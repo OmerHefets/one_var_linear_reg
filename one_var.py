@@ -152,3 +152,5 @@ reg_theta = regression('ex1data1.txt')
 mat = load_data('ex1data1.txt')
 print_reg(mat, reg_theta)
 plot_prediction(16, reg_theta)
+
+#trial
