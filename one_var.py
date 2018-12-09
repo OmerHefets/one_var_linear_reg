@@ -2,6 +2,7 @@ import numpy as np
 # from numpy.linalg import inv
 import matplotlib.pyplot as plt
 from sklearn import preprocessing
+from sklearn.preprocessing import StandardScaler
 
 
 # one variable linear regression without using feature normalization
@@ -57,7 +58,7 @@ def print_reg(matrix, theta):
     plt.show()
 
 
-def scaling_normalization(matrix):
+def scaling_matrix(matrix):
     scaled_mat = matrix
     rows, columns = matrix_size(scaled_mat)
     for i in range(1, columns + 1):
@@ -67,6 +68,34 @@ def scaling_normalization(matrix):
         scaled_mat[:, (i-1):i] -= col_avg
         scaled_mat[:, (i-1):i] /= col_std
     return scaled_mat
+
+
+def scaling_data(matrix):
+    rows, columns = matrix_size(matrix)
+    x, y = separate_x_y(matrix, columns)
+    scaler = StandardScaler()
+    scaler.fit(x)
+    mean = scaler.mean_
+    std = scaler.scale_
+    return mean, std
+
+
+def check_scaling(matrix):
+    sklearn_scaling = preprocessing.scale(matrix)
+    my_scaling = np.matrix(matrix)
+    scaling_matrix(my_scaling)
+    # rounding matrices for comparing
+    if np.array_equal(np.round(sklearn_scaling, decimals=6), np.round(my_scaling, decimals=6)):
+        print("Correct scaling")
+    else:
+        print("Incorrect scaling")
+
+
+def data_scaling(vector, mean, std):
+    vector = vector.astype(float)
+    vector -= mean
+    vector /= std
+    return vector
 
 
 def h_sub_y(x, y, theta):
@@ -94,9 +123,10 @@ def random_theta(para_num):
 
 def data_structuring(file):
     data = load_data(file)
-    # scaling_normalization(data)
     m, parameters = matrix_size(data)
     x_data, y_data = separate_x_y(data, parameters)
+    # x_data = preprocessing.scale(x_data)
+    scaling_matrix(x_data)
     x_data = add_x0_column(x_data)
     first_theta = random_theta(parameters)
     print_plot(data)
@@ -117,22 +147,12 @@ def regression(file_name, alpha=0.01, iter=2000):
     return theta
 
 
-def check_scaling(matrix):
-    sklearn_scaling = preprocessing.scale(matrix)
-    my_scaling = np.matrix(matrix)
-    scaling_normalization(my_scaling)
-    # rounding matrices for comparing
-    if np.array_equal(np.round(sklearn_scaling, decimals=6), np.round(my_scaling, decimals=6)):
-        print("Correct scaling")
-    else:
-        print("Incorrect scaling")
-
-
 # data as a vector, theta as a vector
-def value_prediction(data, theta):
-    # turn a one variable theta to matrix for vectorized calculation
+def value_prediction(data, theta, x_mean, x_std):
+    # turn a one variable data to matrix for vectorized calculation
     if np.isscalar(data):
         data = np.matrix(data)
+    data = data_scaling(data, x_mean, x_std)
     data = np.vstack((1, data))
     regression_prediction = np.dot(data.transpose(), theta)
     return regression_prediction
@@ -144,11 +164,11 @@ def plot_prediction(data, theta):
     plt.show()
 
 
-# needed a comparison between scaled prediction and normal prediction
 # needed a complete function for plotting
 
 
 reg_theta = regression('ex1data1.txt')
 mat = load_data('ex1data1.txt')
 print_reg(mat, reg_theta)
-plot_prediction(16, reg_theta)
+x_mean, x_std = scaling_data(mat)
+print(value_prediction(5, reg_theta, x_mean, x_std))
